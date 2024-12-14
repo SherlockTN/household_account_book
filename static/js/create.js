@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // 動的に選択肢を変更
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("focusedInput2").addEventListener('change', function () {
