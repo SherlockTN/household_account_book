@@ -1,0 +1,26 @@
+/* 全体の余白調整 */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* ナビゲーションバー */
+.navbar {
+    margin: 10px; /* 外側に余白を設定 */
+    border-radius: 8px; /* 角を少し丸める */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 軽い影を追加 */
+}
+
+
+/* メインコンテンツ */
+.container-fluid {
+    padding: 0 10px; /* 左右に余白を設定 */
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 767px) {
+    .navbar, .sidenav, footer {
+        margin: 5px; /* 小さい画面では余白を縮小 */
+        border-radius: 4px; /* 角の丸みも調整 */
+    }
+}
