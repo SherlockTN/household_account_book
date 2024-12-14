@@ -1,1 +1,1 @@
-web: gunicorn app:app --bind 0.0.0.0:8080
+web: gunicorn household_account_book:app --bind 0.0.0.0:$PORT
