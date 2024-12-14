@@ -3,14 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from collections import defaultdict
 from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///detail.db'
-app.config['SQLALCHEMY_BINDS'] = {'aggregate_db': 'sqlite:///summary.db'}
+
+# データベース接続設定（環境変数を使用）
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///detail.db')  # Renderで設定した環境変数を使用
+app.config['SQLALCHEMY_BINDS'] = {'aggregate_db': os.getenv('AGGREGATE_DB_URL', 'sqlite:///summary.db')}  # サマリ用DB
 db = SQLAlchemy(app)
 
 # 明細データ
-# Detailモデルにto_dictメソッドを追加
 class Detail(db.Model):
     id_Item = db.Column(db.Integer, primary_key=True)
     date_Event = db.Column(db.Date)
@@ -22,13 +24,12 @@ class Detail(db.Model):
     def to_dict(self):
         return {
             "id_Item": self.id_Item,
-            "date_Event": self.date_Event.strftime('%Y-%m-%d'),  # 日付は文字列として返す
+            "date_Event": self.date_Event.strftime('%Y-%m-%d'),
             "category_IncomeAndExpense": self.category_IncomeAndExpense,
             "category_Breakdown": self.category_Breakdown,
             "contents_Detail": self.contents_Detail,
             "amount": self.amount
         }
-
 
 # サマリデータ
 class Summary(db.Model):
@@ -153,7 +154,6 @@ def filter_posts():
 
 @app.route('/get-all-data', methods=['GET'])
 def get_all_data():
-    # すべてのデータを取得
     all_data = Detail.query.all()
     data_list = [
         {
@@ -186,9 +186,10 @@ def get_actuals():
     actuals = {row.category_Breakdown: row.total_amount for row in results}
     return jsonify(actuals)
 
+# データベースの作成（Renderでのデプロイ時には不要な場合あり）
+# with app.app_context():
+#     db.create_all()
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
-    # app.run(host='0.0.0.0', port='7777')
+    # Renderではgunicornを使用して起動するため、app.run()は不要
+    pass
