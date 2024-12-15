@@ -152,13 +152,11 @@
                 input.value = savedValue;
             }
 
-            // 入力が変更された時にlocalStorageに保存
             input.addEventListener("input", function() {
                 localStorage.setItem(input.id, input.value);
             });
         });
 
-        // 日付を復元
         const savedStartDate = localStorage.getItem("startDate");
         const savedEndDate = localStorage.getItem("endDate");
         if (savedStartDate) {
@@ -168,99 +166,106 @@
             document.getElementById("endDate").value = savedEndDate;
         }
 
-        updateResults(); // 初期表示の更新
+        updateResults();
     };
 
     function formatNumber(num) {
-        return num.toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' });
+        return num.toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' }).replace("¥", "¥ ");
     }
 
     async function updateResults() {
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
 
-        const budgets = {
-            "給与": parseFloat(document.getElementById("budget_給与").value) || 0,
-            "賞与": parseFloat(document.getElementById("budget_賞与").value) || 0,
-            "その他_収入": parseFloat(document.getElementById("budget_その他_収入").value) || 0,
-            "食費": parseFloat(document.getElementById("budget_食費").value) || 0,
-            "ガス代": parseFloat(document.getElementById("budget_ガス代").value) || 0,
-            "電気代": parseFloat(document.getElementById("budget_電気代").value) || 0,
-            "水道代": parseFloat(document.getElementById("budget_水道代").value) || 0,
-            "交通費": parseFloat(document.getElementById("budget_交通費").value) || 0,
-            "家具": parseFloat(document.getElementById("budget_家具").value) || 0,
-            "家電": parseFloat(document.getElementById("budget_家電").value) || 0,
-            "書籍": parseFloat(document.getElementById("budget_書籍").value) || 0,
-            "衛生": parseFloat(document.getElementById("budget_衛生").value) || 0,
-            "衣類": parseFloat(document.getElementById("budget_衣類").value) || 0,
-            "通信": parseFloat(document.getElementById("budget_通信").value) || 0,
-            "その他_支出": parseFloat(document.getElementById("budget_その他_支出").value) || 0
-        };
+    const budgets = {
+        "給与": parseFloat(document.getElementById("budget_給与").value) || 0,
+        "賞与": parseFloat(document.getElementById("budget_賞与").value) || 0,
+        "その他_収入": parseFloat(document.getElementById("budget_その他_収入").value) || 0,
+        "食費": parseFloat(document.getElementById("budget_食費").value) || 0,
+        "ガス代": parseFloat(document.getElementById("budget_ガス代").value) || 0,
+        "電気代": parseFloat(document.getElementById("budget_電気代").value) || 0,
+        "水道代": parseFloat(document.getElementById("budget_水道代").value) || 0,
+        "交通費": parseFloat(document.getElementById("budget_交通費").value) || 0,
+        "家具": parseFloat(document.getElementById("budget_家具").value) || 0,
+        "家電": parseFloat(document.getElementById("budget_家電").value) || 0,
+        "書籍": parseFloat(document.getElementById("budget_書籍").value) || 0,
+        "衛生": parseFloat(document.getElementById("budget_衛生").value) || 0,
+        "衣類": parseFloat(document.getElementById("budget_衣類").value) || 0,
+        "通信": parseFloat(document.getElementById("budget_通信").value) || 0,
+        "その他_支出": parseFloat(document.getElementById("budget_その他_支出").value) || 0
+    };
 
-        let actuals = {};
-        try {
-            const response = await fetch(`/api/actuals?start_date=${startDate}&end_date=${endDate}`);
-            actuals = await response.json();
-        } catch (error) {
-            console.error("実績データの取得に失敗しました:", error);
+    let actuals = {};
+    try {
+        const response = await fetch(`/api/actuals?start_date=${startDate}&end_date=${endDate}`);
+        actuals = await response.json();
+    } catch (error) {
+        console.error("実績データの取得に失敗しました:", error);
+    }
+
+    let totalIncomeBudget = 0;
+    let totalExpenseBudget = 0;
+    let totalIncomeActual = 0;
+    let totalExpenseActual = 0;
+
+    const resultBody = document.getElementById("resultBody");
+    resultBody.innerHTML = "";
+
+    const categories = Object.keys(budgets);
+    categories.forEach(category => {
+        const budget = budgets[category];
+        const actual = actuals[category] || 0;
+        const difference = budget - actual;
+
+        if (["給与", "賞与", "その他_収入"].includes(category)) {
+            totalIncomeBudget += budget;
+            totalIncomeActual += actual;
+        } else {
+            totalExpenseBudget += budget;
+            totalExpenseActual += actual;
         }
 
-        let totalIncomeBudget = 0;
-        let totalExpenseBudget = 0;
-        let totalIncomeActual = 0;
-        let totalExpenseActual = 0;
+        const row = `
+            <tr>
+                <td>${category}</td>
+                <td>${formatNumber(budget)}</td>
+                <td>${formatNumber(actual)}</td>
+                <td class="${difference >= 0 ? 'text-success' : 'text-danger'}">${formatNumber(difference)}</td>
+            </tr>
+        `;
+        resultBody.innerHTML += row;
+    });
 
-        const resultBody = document.getElementById("resultBody");
-        resultBody.innerHTML = "";
+    // 総計を更新
+    const totalDifferenceBudget = totalIncomeBudget - totalExpenseBudget;
+    const totalDifferenceActual = totalIncomeActual - totalExpenseActual;
 
-        const categories = Object.keys(budgets);
-        categories.forEach(category => {
-            const budget = budgets[category];
-            const actual = actuals[category] || 0;
-            const difference = budget - actual;
+    document.getElementById("totalIncomeBudget").innerHTML = formatNumber(totalIncomeBudget);
+    document.getElementById("totalIncomeActual").innerHTML = formatNumber(totalIncomeActual);
+    document.getElementById("totalIncomeDifference").innerHTML = formatNumber(totalIncomeBudget - totalIncomeActual);
 
-            if (["給与", "賞与", "その他_収入"].includes(category)) {
-                totalIncomeBudget += budget;
-                totalIncomeActual += actual;
-            } else {
-                totalExpenseBudget += budget;
-                totalExpenseActual += actual;
-            }
+    document.getElementById("totalExpenseBudget").innerHTML = formatNumber(totalExpenseBudget);
+    document.getElementById("totalExpenseActual").innerHTML = formatNumber(totalExpenseActual);
+    document.getElementById("totalExpenseDifference").innerHTML = formatNumber(totalExpenseBudget - totalExpenseActual);
 
-            const differenceClass = difference >= 0 ? 'text-success' : 'text-danger';
+    document.getElementById("totalDifferenceBudget").innerHTML = formatNumber(totalDifferenceBudget);
+    document.getElementById("totalDifferenceActual").innerHTML = formatNumber(totalDifferenceActual);
+    document.getElementById("totalDifference").innerHTML = formatNumber(totalDifferenceActual);
 
-            const row = `
-                <tr>
-                    <td>${category}</td>
-                    <td>${formatNumber(budget)}</td>
-                    <td>${formatNumber(actual)}</td>
-                    <td class="${differenceClass}">${formatNumber(difference)}</td>
-                </tr>
-            `;
-            resultBody.innerHTML += row;
-        });
+    // 色分けを適用
+    applyColor("totalIncomeDifference", totalIncomeBudget - totalIncomeActual);
 
-        // 総計を更新
-        document.getElementById("totalIncomeBudget").innerText = formatNumber(totalIncomeBudget);
-        document.getElementById("totalIncomeActual").innerText = formatNumber(totalIncomeActual);
-        const totalIncomeDifference = totalIncomeBudget - totalIncomeActual;
-        const totalIncomeDifferenceClass = totalIncomeDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalIncomeDifference").innerText = formatNumber(totalIncomeDifference);
-        document.getElementById("totalIncomeDifference").className = totalIncomeDifferenceClass;
+    applyColor("totalExpenseDifference", totalExpenseBudget - totalExpenseActual);
 
-        document.getElementById("totalExpenseBudget").innerText = formatNumber(totalExpenseBudget);
-        document.getElementById("totalExpenseActual").innerText = formatNumber(totalExpenseActual);
-        const totalExpenseDifference = totalExpenseBudget - totalExpenseActual;
-        const totalExpenseDifferenceClass = totalExpenseDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalExpenseDifference").innerText = formatNumber(totalExpenseDifference);
-        document.getElementById("totalExpenseDifference").className = totalExpenseDifferenceClass;
-
-        const totalDifference = totalIncomeBudget - totalExpenseBudget - (totalIncomeActual - totalExpenseActual);
-        const totalDifferenceClass = totalDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifference").innerText = formatNumber(totalDifference);
-        document.getElementById("totalDifference").className = totalDifferenceClass;
-    }
+    applyColor("totalDifferenceBudget", totalDifferenceBudget);
+    applyColor("totalDifferenceActual", totalDifferenceActual);
+    applyColor("totalDifference", totalDifferenceActual);
+}
+// 汎用的な色分け関数
+function applyColor(elementId, value) {
+    const element = document.getElementById(elementId);
+    element.className = value >= 0 ? 'text-success' : 'text-danger';
+}
 </script>
-
 
 {% endblock %}
