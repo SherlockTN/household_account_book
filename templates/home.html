@@ -166,6 +166,10 @@
         updateResults(); // 初期表示の更新
     };
 
+    function formatNumber(num) {
+        return num.toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' });
+    }
+
     async function updateResults() {
         const startDate = document.getElementById("startDate").value;
         const endDate = document.getElementById("endDate").value;
@@ -196,7 +200,6 @@
             console.error("実績データの取得に失敗しました:", error);
         }
 
-        // 以下、実績データを用いて表を更新する処理
         let totalIncomeBudget = 0;
         let totalExpenseBudget = 0;
         let totalIncomeActual = 0;
@@ -224,51 +227,43 @@
             const row = `
                 <tr>
                     <td>${category}</td>
-                    <td>¥${budget}</td>
-                    <td>¥${actual}</td>
-                    <td class="${differenceClass}">¥${difference}</td>
+                    <td>${formatNumber(budget)}</td>
+                    <td>${formatNumber(actual)}</td>
+                    <td class="${differenceClass}">${formatNumber(difference)}</td>
                 </tr>
             `;
             resultBody.innerHTML += row;
         });
 
-
         // 総計を更新
-        document.getElementById("totalIncomeBudget").innerText = `¥${totalIncomeBudget}`;
-        document.getElementById("totalIncomeActual").innerText = `¥${totalIncomeActual}`;
-        // 総収入の差分
+        document.getElementById("totalIncomeBudget").innerText = formatNumber(totalIncomeBudget);
+        document.getElementById("totalIncomeActual").innerText = formatNumber(totalIncomeActual);
         const totalIncomeDifference = totalIncomeBudget - totalIncomeActual;
         const totalIncomeDifferenceClass = totalIncomeDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalIncomeDifference").innerText = `¥${totalIncomeDifference}`;
+        document.getElementById("totalIncomeDifference").innerText = formatNumber(totalIncomeDifference);
         document.getElementById("totalIncomeDifference").className = totalIncomeDifferenceClass;
 
-        document.getElementById("totalExpenseBudget").innerText = `¥${totalExpenseBudget}`;
-        document.getElementById("totalExpenseActual").innerText = `¥${totalExpenseActual}`;
-        // 総支出の差分
+        document.getElementById("totalExpenseBudget").innerText = formatNumber(totalExpenseBudget);
+        document.getElementById("totalExpenseActual").innerText = formatNumber(totalExpenseActual);
         const totalExpenseDifference = totalExpenseBudget - totalExpenseActual;
         const totalExpenseDifferenceClass = totalExpenseDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalExpenseDifference").innerText = `¥${totalExpenseDifference}`;
+        document.getElementById("totalExpenseDifference").innerText = formatNumber(totalExpenseDifference);
         document.getElementById("totalExpenseDifference").className = totalExpenseDifferenceClass;
 
-        // 総差分（予算）
         const totalDifferenceBudget = totalIncomeBudget - totalExpenseBudget;
         const totalDifferenceBudgetClass = totalDifferenceBudget >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifferenceBudget").innerText = `¥${totalDifferenceBudget}`;
+        document.getElementById("totalDifferenceBudget").innerText = formatNumber(totalDifferenceBudget);
         document.getElementById("totalDifferenceBudget").className = totalDifferenceBudgetClass;
 
-        // 総差分（実績）
         const totalDifferenceActual = totalIncomeActual - totalExpenseActual;
         const totalDifferenceActualClass = totalDifferenceActual >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifferenceActual").innerText = `¥${totalDifferenceActual}`;
+        document.getElementById("totalDifferenceActual").innerText = formatNumber(totalDifferenceActual);
         document.getElementById("totalDifferenceActual").className = totalDifferenceActualClass;
 
-
-        // 差分の最終結果
         const totalDifference = totalDifferenceBudget - totalDifferenceActual;
         const totalDifferenceClass = totalDifference >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifference").innerText = `¥${totalDifference}`;
+        document.getElementById("totalDifference").innerText = formatNumber(totalDifference);
         document.getElementById("totalDifference").className = `text-bold ${totalDifferenceClass}`;
-
 
         // 入力値をローカルストレージに保存
         const inputs = document.querySelectorAll("#budgetForm input");
@@ -279,7 +274,6 @@
         // 日付をローカルストレージに保存
         localStorage.setItem("startDate", startDate);
         localStorage.setItem("endDate", endDate);
-
     }
 </script>
 {% endblock %}
