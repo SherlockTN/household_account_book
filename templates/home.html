@@ -151,6 +151,11 @@
             if (savedValue !== null) {
                 input.value = savedValue;
             }
+
+            // 入力が変更された時にlocalStorageに保存
+            input.addEventListener("input", function() {
+                localStorage.setItem(input.id, input.value);
+            });
         });
 
         // 日付を復元
@@ -256,5 +261,6 @@
         document.getElementById("totalDifference").className = totalDifferenceClass;
     }
 </script>
+
 
 {% endblock %}
