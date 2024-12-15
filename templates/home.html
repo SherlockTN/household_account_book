@@ -69,12 +69,16 @@
                     <input type="number" class="form-control" id="budget_書籍" placeholder="予算を入力">
                 </div>
                 <div class="form-group">
-                    <label for="budget_衛生用品">衛生用品</label>
+                    <label for="budget_衛生">衛生</label>
                     <input type="number" class="form-control" id="budget_衛生用品" placeholder="予算を入力">
                 </div>
                 <div class="form-group">
                     <label for="budget_衣類">衣類</label>
                     <input type="number" class="form-control" id="budget_衣類" placeholder="予算を入力">
+                </div>
+                <div class="form-group">
+                    <label for="budget_通信">通信</label>
+                    <input type="number" class="form-control" id="budget_通信" placeholder="予算を入力">
                 </div>
                 <div class="form-group">
                     <label for="budget_その他_支出">その他_支出</label>
@@ -178,8 +182,9 @@
             "家具": parseFloat(document.getElementById("budget_家具").value) || 0,
             "家電": parseFloat(document.getElementById("budget_家電").value) || 0,
             "書籍": parseFloat(document.getElementById("budget_書籍").value) || 0,
-            "衛生用品": parseFloat(document.getElementById("budget_衛生用品").value) || 0,
+            "衛生": parseFloat(document.getElementById("budget_衛生").value) || 0,
             "衣類": parseFloat(document.getElementById("budget_衣類").value) || 0,
+            "通信": parseFloat(document.getElementById("budget_通信").value) || 0,
             "その他_支出": parseFloat(document.getElementById("budget_その他_支出").value) || 0
         };
 

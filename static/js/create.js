@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const select = document.getElementById("focusedInput3"); // selectタグを取得する
         const dict_BreakdownCategory = {
             "収入": ["給与", "賞与", "その他_収入"],
-            "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生用品", "衣類", "その他_支出"],
+            "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生", "衣類", '通信', "その他_支出"],
         };
 
         // 初期化（現在の選択肢をクリア）
@@ -63,7 +63,7 @@ function loadData(button) {
 function updateBreakdownOptions(incomeExpense, selectedBreakdown) {
     const breakdownCategory = {
         "収入": ["給与", "賞与", "その他_収入"],
-        "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生用品", "衣類", "その他_支出"]
+        "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生", "衣類", "通信", "その他_支出"]
     };
 
     const breakdownSelect = document.getElementById('modalCategoryBreakdown');
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const select = document.getElementById("modalCategoryBreakdown"); // selectタグを取得する
         const dict_BreakdownCategory = {
             "収入": ["給与", "賞与", "その他_収入"],
-            "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生用品", "衣類", "その他_支出"],
+            "支出": ["食費", "ガス代", "電気代", "水道代", "交通費", "家具", "家電", "書籍", "衛生", "衣類", "通信", "その他_支出"],
         };
 
         // 初期化（現在の選択肢をクリア）
