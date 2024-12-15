@@ -70,7 +70,7 @@
                 </div>
                 <div class="form-group">
                     <label for="budget_衛生">衛生</label>
-                    <input type="number" class="form-control" id="budget_衛生用品" placeholder="予算を入力">
+                    <input type="number" class="form-control" id="budget_衛生" placeholder="予算を入力">
                 </div>
                 <div class="form-group">
                     <label for="budget_衣類">衣類</label>
@@ -250,30 +250,11 @@
         document.getElementById("totalExpenseDifference").innerText = formatNumber(totalExpenseDifference);
         document.getElementById("totalExpenseDifference").className = totalExpenseDifferenceClass;
 
-        const totalDifferenceBudget = totalIncomeBudget - totalExpenseBudget;
-        const totalDifferenceBudgetClass = totalDifferenceBudget >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifferenceBudget").innerText = formatNumber(totalDifferenceBudget);
-        document.getElementById("totalDifferenceBudget").className = totalDifferenceBudgetClass;
-
-        const totalDifferenceActual = totalIncomeActual - totalExpenseActual;
-        const totalDifferenceActualClass = totalDifferenceActual >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById("totalDifferenceActual").innerText = formatNumber(totalDifferenceActual);
-        document.getElementById("totalDifferenceActual").className = totalDifferenceActualClass;
-
-        const totalDifference = totalDifferenceBudget - totalDifferenceActual;
+        const totalDifference = totalIncomeBudget - totalExpenseBudget - (totalIncomeActual - totalExpenseActual);
         const totalDifferenceClass = totalDifference >= 0 ? 'text-success' : 'text-danger';
         document.getElementById("totalDifference").innerText = formatNumber(totalDifference);
-        document.getElementById("totalDifference").className = `text-bold ${totalDifferenceClass}`;
-
-        // 入力値をローカルストレージに保存
-        const inputs = document.querySelectorAll("#budgetForm input");
-        inputs.forEach(input => {
-            localStorage.setItem(input.id, input.value);
-        });
-
-        // 日付をローカルストレージに保存
-        localStorage.setItem("startDate", startDate);
-        localStorage.setItem("endDate", endDate);
+        document.getElementById("totalDifference").className = totalDifferenceClass;
     }
 </script>
+
 {% endblock %}

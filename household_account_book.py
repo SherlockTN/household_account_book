@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
@@ -194,5 +193,3 @@ def get_actuals():
 if __name__ == "__main__":
     # Renderではgunicornを使用して起動するため、app.run()は不要
     app.run(host='0.0.0.0', port=8080)
-
-    pass
