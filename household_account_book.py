@@ -4,13 +4,18 @@ from sqlalchemy import func
 from collections import defaultdict
 from datetime import datetime
 import os
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 
-# データベース接続設定（環境変数を使用）
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///detail.db')  # Renderで設定した環境変数を使用
-app.config['SQLALCHEMY_BINDS'] = {'aggregate_db': os.getenv('AGGREGATE_DB_URL', 'sqlite:///summary.db')}  # サマリ用DB
+# PostgreSQL database connection settings
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://username:password@localhost:5432/detail_db')  # Use your PostgreSQL URI
+app.config['SQLALCHEMY_BINDS'] = {'aggregate_db': os.getenv('AGGREGATE_DB_URL', 'postgresql://username:password@localhost:5432/summary_db')}  # Aggregate DB
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable modification tracking to save resources
 db = SQLAlchemy(app)
+
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
 # 明細データ
 class Detail(db.Model):
@@ -157,11 +162,11 @@ def get_all_data():
     all_data = Detail.query.all()
     data_list = [
         {
-            "id": data.id,
-            "date": data.date,
-            "income_expense": data.income_expense,
-            "breakdown": data.breakdown,
-            "detail": data.detail,
+            "id": data.id_Item,
+            "date": data.date_Event,
+            "income_expense": data.category_IncomeAndExpense,
+            "breakdown": data.category_Breakdown,
+            "detail": data.contents_Detail,
             "amount": data.amount,
         }
         for data in all_data
@@ -191,5 +196,5 @@ def get_actuals():
 #     db.create_all()
 
 if __name__ == "__main__":
-    # Renderではgunicornを使用して起動するため、app.run()は不要
+    # Run your app
     app.run(host='0.0.0.0', port=8080)
