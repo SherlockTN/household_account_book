@@ -4,8 +4,13 @@ from sqlalchemy import func
 from collections import defaultdict
 from datetime import datetime
 import os
+from dotenv import load_dotenv
 
 
+
+
+# .env ファイルを探して読み込む
+load_dotenv(r'.env')
 
 app = Flask(__name__)
 
@@ -43,7 +48,6 @@ class Summary(db.Model):
 
 # サマリデータの更新
 def update_summary():
-    db.session.query(Summary).delete()
     results = (
         db.session.query(
             Detail.date_Event,
@@ -61,14 +65,21 @@ def update_summary():
             summary_data[row.date_Event]["expenditure"] += row.total_amount
 
     for date_event, data in summary_data.items():
-        summary_entry = Summary(
-            date_Event=date_event,
-            income_Total=data["income"],
-            expenditure_Total=data["expenditure"],
-            balance=data["income"] - data["expenditure"]
-        )
-        db.session.add(summary_entry)
+        summary_entry = Summary.query.filter_by(date_Event=date_event).first()
+        if summary_entry:
+            summary_entry.income_Total = data["income"]
+            summary_entry.expenditure_Total = data["expenditure"]
+            summary_entry.balance = data["income"] - data["expenditure"]
+        else:
+            summary_entry = Summary(
+                date_Event=date_event,
+                income_Total=data["income"],
+                expenditure_Total=data["expenditure"],
+                balance=data["income"] - data["expenditure"]
+            )
+            db.session.add(summary_entry)
     db.session.commit()
+
 
 # ホームページ（サマリ一覧表示）
 @app.route('/', methods=['GET'])
@@ -79,27 +90,30 @@ def index():
 # 明細の一覧と登録
 @app.route('/create', methods=['GET', 'POST'])
 def create():
-    if request.method == 'POST':
-        date_Event = datetime.strptime(request.form['date_Event'], '%Y-%m-%d')
-        category_IncomeAndExpense = request.form['category_IncomeAndExpense']
-        category_Breakdown = request.form['category_Breakdown']
-        contents_Detail = request.form['contents_Detail']
-        amount = int(request.form['amount'])
+    try:
+        if request.method == 'POST':
+            date_Event = datetime.strptime(request.form['date_Event'], '%Y-%m-%d')
+            category_IncomeAndExpense = request.form['category_IncomeAndExpense']
+            category_Breakdown = request.form['category_Breakdown']
+            contents_Detail = request.form['contents_Detail']
+            amount = int(request.form['amount'])
 
-        new_post = Detail(
-            date_Event=date_Event,
-            category_IncomeAndExpense=category_IncomeAndExpense,
-            category_Breakdown=category_Breakdown,
-            contents_Detail=contents_Detail,
-            amount=amount
-        )
-        db.session.add(new_post)
-        db.session.commit()
-        update_summary()
-        return redirect('/create')
+            new_post = Detail(
+                date_Event=date_Event,
+                category_IncomeAndExpense=category_IncomeAndExpense,
+                category_Breakdown=category_Breakdown,
+                contents_Detail=contents_Detail,
+                amount=amount
+            )
+            db.session.add(new_post)
+            db.session.commit()
+            update_summary()
+            return redirect('/create')
+        posts = Detail.query.order_by(Detail.date_Event.desc(), Detail.id_Item.desc()).all()
+        return render_template('create.html', posts=posts)
+    except Exception as e:
+        return jsonify({'message': 'エラーが発生しました', 'error': str(e)}), 500
 
-    posts = Detail.query.order_by(Detail.date_Event.desc(), Detail.id_Item.desc()).all()
-    return render_template('create.html', posts=posts)
 
 # 明細の詳細表示
 @app.route('/detail/<int:id_Item>')
@@ -111,18 +125,18 @@ def read(id_Item):
 @app.route('/update/<int:id_Item>', methods=['POST'])
 def update_post(id_Item):
     try:
-        data = request.json
         post = Detail.query.get_or_404(id_Item)
-        post.date_Event = datetime.strptime(data['date_Event'], '%Y-%m-%d').date()
-        post.category_IncomeAndExpense = data['category_IncomeAndExpense']
-        post.category_Breakdown = data['category_Breakdown']
-        post.contents_Detail = data['contents_Detail']
-        post.amount = int(data['amount'])
+        post.date_Event = datetime.strptime(request.form['date_Event'], '%Y-%m-%d').date()
+        post.category_IncomeAndExpense = request.form['category_IncomeAndExpense']
+        post.category_Breakdown = request.form['category_Breakdown']
+        post.contents_Detail = request.form['contents_Detail']
+        post.amount = int(request.form['amount'])
 
         db.session.commit()
         return jsonify({'message': '更新が成功しました', 'success': True}), 200
     except Exception as e:
         return jsonify({'message': '更新に失敗しました', 'error': str(e), 'success': False}), 400
+
 
 # 明細の削除
 @app.route('/delete/<int:id_Item>')
@@ -136,4 +150,4 @@ def delete(id_Item):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'false') == 'true')
