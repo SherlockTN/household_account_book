@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 
 # .env ファイルを探して読み込む
-load_dotenv(r'.env')
+load_dotenv()
 
 app = Flask(__name__)
 
