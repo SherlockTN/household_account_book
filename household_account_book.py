@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv(r'.env') # テスト環境では引数に.envのパスを入力
 
 app = Flask(__name__)
-print(os.environ.get('DATABASE_URL') )
+
 # PostgreSQL用の接続設定
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')  # Renderの環境変数から取得
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -148,6 +148,5 @@ def delete(id_Item):
     return redirect('/create')
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=os.environ.get('FLASK_DEBUG', 'false') == 'true')
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
