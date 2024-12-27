@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv(r'.env') # テスト環境では引数に.envのパスを入力
 
 app = Flask(__name__)
-
+print(os.environ.get('DATABASE_URL') )
 # PostgreSQL用の接続設定
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')  # Renderの環境変数から取得
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
