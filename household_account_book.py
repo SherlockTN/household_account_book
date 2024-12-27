@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 
 # PostgreSQL用の接続設定
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:aptx4869@localhost:5432/detail'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')  # Renderの環境変数から取得
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
