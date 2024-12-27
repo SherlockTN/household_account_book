@@ -5,17 +5,12 @@ from collections import defaultdict
 from datetime import datetime
 import os
 
-# 日本語を含むファイルパス
-file_path = "C:/Users/0504a/OneDrive/ドキュメント/家計簿/detail.db"
-
-# パスを明示的にエンコード
-encoded_path = file_path.encode('utf-8').decode('utf-8')
 
 
 app = Flask(__name__)
 
 # PostgreSQL用の接続設定
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:aptx4869@localhost:5432/detail'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
