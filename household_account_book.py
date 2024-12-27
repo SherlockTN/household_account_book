@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 
 # .env ファイルを探して読み込む
-load_dotenv()
+load_dotenv(r'.env') # テスト環境では引数に.envのパスを入力
 
 app = Flask(__name__)
 
