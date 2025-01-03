@@ -245,40 +245,24 @@
         updateTotalResults(totalIncomeBudget, totalIncomeActual, totalExpenseBudget, totalExpenseActual);
     }
 
-    // 総計を更新する関数
-    function updateTotalResults(totalIncomeBudget, totalIncomeActual, totalExpenseBudget, totalExpenseActual) {
-        const totalDifferenceBudget = totalIncomeBudget - totalExpenseBudget;
-        const totalDifferenceActual = totalIncomeActual - totalExpenseActual;
+    function updateTotalResults(incomeBudget, incomeActual, expenseBudget, expenseActual) {
+        const incomeDifference = incomeBudget - incomeActual;
+        const expenseDifference = expenseBudget - expenseActual;
+        const totalDifference = incomeDifference - expenseDifference;
 
-        document.getElementById("totalIncomeBudget").innerHTML = formatNumber(totalIncomeBudget);
-        document.getElementById("totalIncomeActual").innerHTML = formatNumber(totalIncomeActual);
-        document.getElementById("totalIncomeDifference").innerHTML = formatNumber(totalIncomeBudget - totalIncomeActual);
+        document.getElementById("totalIncomeBudget").innerText = formatNumber(incomeBudget);
+        document.getElementById("totalIncomeActual").innerText = formatNumber(incomeActual);
+        document.getElementById("totalIncomeDifference").innerText = formatNumber(incomeDifference);
 
-        document.getElementById("totalExpenseBudget").innerHTML = formatNumber(totalExpenseBudget);
-        document.getElementById("totalExpenseActual").innerHTML = formatNumber(totalExpenseActual);
-        document.getElementById("totalExpenseDifference").innerHTML = formatNumber(totalExpenseBudget - totalExpenseActual);
+        document.getElementById("totalExpenseBudget").innerText = formatNumber(expenseBudget);
+        document.getElementById("totalExpenseActual").innerText = formatNumber(expenseActual);
+        document.getElementById("totalExpenseDifference").innerText = formatNumber(expenseDifference);
 
-        document.getElementById("totalDifferenceBudget").innerHTML = formatNumber(totalDifferenceBudget);
-        document.getElementById("totalDifferenceActual").innerHTML = formatNumber(totalDifferenceActual);
-        document.getElementById("totalDifference").innerHTML = formatNumber(totalDifferenceActual);
-
-        // 色分けを適用
-        applyColor("totalIncomeDifference", totalIncomeBudget - totalIncomeActual);
-        applyColor("totalExpenseDifference", totalExpenseBudget - totalExpenseActual);
-        applyColor("totalDifferenceBudget", totalDifferenceBudget);
-        applyColor("totalDifferenceActual", totalDifferenceActual);
-        applyColor("totalDifference", totalDifferenceActual);
-    }
-
-    // 色分けを適用する関数
-    function applyColor(elementId, value) {
-        const element = document.getElementById(elementId);
-        if (value < 0) {
-            element.classList.add('text-danger');
-        } else {
-            element.classList.remove('text-danger');
-            element.classList.add('text-success');
-        }
+        document.getElementById("totalDifferenceBudget").innerText = formatNumber(incomeBudget - expenseBudget);
+        document.getElementById("totalDifferenceActual").innerText = formatNumber(incomeActual - expenseActual);
+        document.getElementById("totalDifference").innerText = formatNumber(totalDifference);
+        document.getElementById("totalDifference").classList.toggle('text-danger', totalDifference < 0);
+        document.getElementById("totalDifference").classList.toggle('text-success', totalDifference >= 0);
     }
 </script>
 {% endblock %}

@@ -58,7 +58,11 @@ def get_details():
 # 明細の追加
 def add_detail(data):
     details = get_details()
-    data['id_Item'] = str(len(details) + 1)  # IDを追加
+    
+    # 最も高いIDを取得して1を足して新しいIDを決定
+    max_id = max([int(detail['id_Item']) for detail in details], default=0)
+    data['id_Item'] = str(max_id + 1)  # 新しいIDを設定
+    
     append_to_details_csv(data)
     update_summary()  # サマリーデータを更新
 
@@ -89,6 +93,15 @@ def update_summary():
         })
     write_summary_to_csv(summary_list)
 
+# 日付範囲に基づいてサマリーを取得する
+def get_summary_by_date_range(start_date, end_date):
+    summaries = read_summary_from_csv()
+    filtered_summaries = [
+        summary for summary in summaries
+        if start_date <= summary['date_Event'] <= end_date
+    ]
+    return filtered_summaries
+
 # ホームページ（サマリ一覧表示）
 @app.route('/', methods=['GET'])
 def index():
@@ -106,13 +119,6 @@ def create():
             contents_Detail = request.form['contents_Detail']
             amount = request.form['amount'].replace(',', '')  # カンマを削除
             amount = int(amount)  # 金額を整数に変換
-
-            # デバッグ用プリント文
-            print(f"date_Event: {date_Event}")
-            print(f"category_IncomeAndExpense: {category_IncomeAndExpense}")
-            print(f"category_Breakdown: {category_Breakdown}")
-            print(f"contents_Detail: {contents_Detail}")
-            print(f"amount: {amount}")
 
             # CSVにデータを追加
             new_post = {
@@ -143,8 +149,6 @@ def read(id_Item):
 @app.route('/update/<int:id_Item>', methods=['POST'])
 def update_post(id_Item):
     try:
-        print("フォームデータ:", request.form)  # リクエスト内容をデバッグ出力
-        
         posts = get_details()
         post = next((p for p in posts if int(p['id_Item']) == id_Item), None)
         data = request.get_json()
@@ -165,9 +169,7 @@ def update_post(id_Item):
             return jsonify({'message': '更新が成功しました', 'success': True}), 200
         return jsonify({'message': 'データが見つかりません', 'success': False}), 404
     except Exception as e:
-        print(f"エラー内容: {e}")  # エラー内容をデバッグ出力
         return jsonify({'message': '更新に失敗しました', 'error': str(e), 'success': False}), 400
-
 
 # 明細の削除
 @app.route('/delete/<int:id_Item>')
@@ -190,21 +192,16 @@ def delete(id_Item):
     except Exception as e:
         return jsonify({'message': '削除に失敗しました', 'error': str(e)}), 400
 
-
-
-# 日付でフィルタリング
+# 日付範囲でフィルタリング
 @app.route('/filter', methods=['GET'])
 def filter_by_date():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    # CSVデータを取得
-    details = get_details()
+    # サマリーデータを日付範囲でフィルタリング
+    filtered_summaries = get_summary_by_date_range(start_date, end_date)
 
-    # フィルタリング
-    filtered_details = [d for d in details if start_date <= d['date_Event'] <= end_date]
-
-    return render_template('create.html', posts=filtered_details)
+    return render_template('home.html', summaries=filtered_summaries)
 
 if __name__ == "__main__":
     app.run(debug=True)
