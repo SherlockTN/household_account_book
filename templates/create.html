@@ -19,7 +19,7 @@
                 <div class="mb-3 row">
                     <label for="category_IncomeAndExpense" class="col-sm-2 col-form-label">収支区分</label>
                     <div class="col-sm-10">
-                        <select class="form-select" id="focusedInput2" name="category_IncomeAndExpense" required>
+                        <select class="form-select" id="focusedInput2" name="category_IncomeAndExpense" required onchange="updateBreakdownOptions()">
                             <option value="" selected disabled>選択してください</option>
                             <option value="収入">収入</option>
                             <option value="支出">支出</option>
@@ -46,7 +46,7 @@
                 <div class="mb-3 row">
                     <label for="amount" class="col-sm-2 col-form-label">金額</label>
                     <div class="col-sm-10">
-                        <input type="text" name="amount" class="form-control" id="focusedInput5" required oninput="formatAmount(this)">
+                        <input type="text" name="amount" class="form-control" id="focusedInput5" oninput="formatAmount(this)">
                     </div>
                 </div>
                 <!-- ボタン -->
@@ -117,23 +117,18 @@
                 <td>{{ post.category_IncomeAndExpense }}</td>
                 <td>{{ post.category_Breakdown }}</td>
                 <td>{{ post.contents_Detail }}</td>
-                <td>{{ "{:,.0f}".format(post.amount) }}</td>
+                <td>{{ "{:,.0f}".format(post.amount | int) }}</td>
                 <td>
                     <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal"
-                            data-id="{{ post.id_Item }}"
-                            data-date="{{ post.date_Event }}"
-                            data-income-expense="{{ post.category_IncomeAndExpense }}"
-                            data-breakdown="{{ post.category_Breakdown }}"
-                            data-detail="{{ post.contents_Detail }}"
-                            data-amount="{{ post.amount }}"
+                            data-id="{{ post.id_Item }}" data-date="{{ post.date_Event }}",
+                            data-income-expense="{{ post.category_IncomeAndExpense }}" data-breakdown="{{ post.category_Breakdown }}"
+                            data-detail="{{ post.contents_Detail }}" data-amount="{{ post.amount }}"
                             onclick="loadData(this)">
                         修正
                     </button>
                 </td>
                 <td>
-                    <button onclick="location.href='/delete/{{ post.id_Item }}'" 
-                            type="button" 
-                            class="btn btn-danger btn-sm">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ post.id_Item }}')">
                         削除
                     </button>
                 </td>
@@ -144,6 +139,14 @@
 </div>
 
 <script>
+    function confirmDelete(id_Item) {
+        // 削除確認ダイアログ
+        if (confirm("本当に削除しますか？")) {
+            // 確認後、削除リンクに遷移
+            window.location.href = '/delete/' + id_Item;
+        }
+    }
+
     function filterByDate() {
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
@@ -161,6 +164,40 @@
         let value = input.value.replace(/,/g, ''); // Remove existing commas
         if (!isNaN(value) && value !== '') {
             input.value = Number(value).toLocaleString(); // Format with commas
+        }
+    }
+
+    function loadData(button) {
+        const id = button.getAttribute('data-id');
+        const date = button.getAttribute('data-date');
+        const incomeExpense = button.getAttribute('data-income-expense');
+        const breakdown = button.getAttribute('data-breakdown');
+        const detail = button.getAttribute('data-detail');
+        const amount = button.getAttribute('data-amount');
+
+        // モーダル内のフォームに値をセット
+        document.getElementById('modalDateEvent').value = date;
+        document.getElementById('modalCategoryIncome').value = incomeExpense;
+        document.getElementById('modalCategoryBreakdown').value = breakdown;
+        document.getElementById('modalContentsDetail').value = detail;
+        document.getElementById('modalAmount').value = amount;
+    }
+
+    function updateBreakdownOptions() {
+        const incomeExpense = document.getElementById('focusedInput2').value;
+        const breakdownSelect = document.getElementById('focusedInput3');
+        breakdownSelect.innerHTML = ''; // 初期化
+        const options = {
+            "収入": ["給与", "賞与", "その他"],
+            "支出": ["食費", "光熱費", "交通費", "その他"]
+        };
+        if (options[incomeExpense]) {
+            options[incomeExpense].forEach(option => {
+                const newOption = document.createElement('option');
+                newOption.value = option;
+                newOption.textContent = option;
+                breakdownSelect.appendChild(newOption);
+            });
         }
     }
 </script>
@@ -181,28 +218,28 @@
                 <form id="editForm">
                     <div class="form-group">
                         <label for="modalDateEvent">日付</label>
-                        <input type="date" class="form-control" id="modalDateEvent">
+                        <input type="date" class="form-control" id="modalDateEvent" name="date_Event">
                     </div>
                     <div class="form-group">
                         <label for="modalCategoryIncome">収支区分</label>
-                        <select class="form-control" id="modalCategoryIncome" onchange="updateBreakdownOptions()">
+                        <select class="form-control" id="modalCategoryIncome" onchange="updateBreakdownOptions()" name="category_IncomeAndExpense">
                             <option value="収入">収入</option>
                             <option value="支出">支出</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="modalCategoryBreakdown">内訳区分</label>
-                        <select class="form-control" id="modalCategoryBreakdown">
+                        <select class="form-control" id="modalCategoryBreakdown" name="category_Breakdown">
                             <!-- 動的に変化 -->
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="modalContentsDetail">詳細</label>
-                        <input type="text" class="form-control" id="modalContentsDetail">
+                        <input type="text" class="form-control" id="modalContentsDetail" name="contents_Detail">
                     </div>
                     <div class="form-group">
                         <label for="modalAmount">金額</label>
-                        <input type="text" class="form-control" id="modalAmount">
+                        <input type="text" class="form-control" id="modalAmount" name="amount">
                     </div>
                 </form>
             </div>
@@ -214,5 +251,4 @@
     </div>
 </div>
 
-<script src="../static/js/create.js"></script>
 {% endblock %}
